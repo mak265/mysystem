@@ -668,6 +668,7 @@ function showUploadForm() {
           <option value="Phone">Phone</option>
           <option value="Networking">Networking</option>
           <option value="Custom Systems">Custom Systems</option>
+          <option value="Graphic Design">Graphic Design</option>
           <option value="General">General</option>
         </select>
       </div>
@@ -1012,6 +1013,7 @@ function showServiceForm(id = null) {
             <option value="Phone" ${service?.category === 'Phone' ? 'selected' : ''}>Phone</option>
             <option value="Networking" ${service?.category === 'Networking' ? 'selected' : ''}>Networking</option>
             <option value="Custom Systems" ${service?.category === 'Custom Systems' ? 'selected' : ''}>Custom Systems</option>
+            <option value="Graphic Design" ${service?.category === 'Graphic Design' ? 'selected' : ''}>Graphic Design</option>
           </select>
         </div>
       </div>

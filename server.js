@@ -303,6 +303,9 @@ async function startServer() {
       ['Custom System Development', 'Custom Systems', 'Custom software/system development', 15000],
       ['System Maintenance', 'Custom Systems', 'Ongoing system maintenance and support', 3000],
       ['POS System Setup', 'Custom Systems', 'Point of Sale system installation', 8000],
+      ['Logo Design', 'Graphic Design', 'Custom logo design for businesses', 2500],
+      ['Tarpaulin & Banner Design', 'Graphic Design', 'Tarpaulin, banner, and signage design', 1500],
+      ['Social Media Graphics', 'Graphic Design', 'Social media post and cover designs', 1000],
     ];
     for (const [name, category, description, base_price] of defaultServices) {
       db.run('INSERT INTO services (name, category, description, base_price) VALUES (?, ?, ?, ?)',
