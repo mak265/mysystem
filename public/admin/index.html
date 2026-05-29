@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Makrone - Admin Panel</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+  <div class="app">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <i class="fas fa-bolt"></i>
+          <span>MAKRONE</span>
+        </div>
+        <p class="tagline">Admin Panel</p>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="#" class="nav-item active" data-page="dashboard">
+          <i class="fas fa-chart-line"></i><span>Dashboard</span>
+        </a>
+        <a href="#" class="nav-item" data-page="analytics">
+          <i class="fas fa-chart-bar"></i><span>Analytics</span>
+        </a>
+        <a href="#" class="nav-item" data-page="inquiries">
+          <i class="fas fa-envelope"></i><span>Inquiries</span>
+        </a>
+        <a href="#" class="nav-item" data-page="reviews">
+          <i class="fas fa-star"></i><span>Reviews</span>
+        </a>
+        <a href="#" class="nav-item" data-page="clients">
+          <i class="fas fa-users"></i><span>Clients</span>
+        </a>
+        <a href="#" class="nav-item" data-page="jobs">
+          <i class="fas fa-clipboard-list"></i><span>Job Orders</span>
+        </a>
+        <a href="#" class="nav-item" data-page="services">
+          <i class="fas fa-tools"></i><span>Services</span>
+        </a>
+        <a href="#" class="nav-item" data-page="invoices">
+          <i class="fas fa-file-invoice-dollar"></i><span>Invoices</span>
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <a href="/" class="nav-item" style="color: var(--gray-400); font-size: 0.8rem;">
+          <i class="fas fa-globe"></i><span>View Website</span>
+        </a>
+        <p>&copy; 2024 Makrone</p>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <header class="top-bar">
+        <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+        <h1 id="pageTitle">Dashboard</h1>
+        <div class="user-info">
+          <i class="fas fa-user-circle"></i>
+          <span>Admin</span>
+        </div>
+      </header>
+
+      <div class="content" id="content">
+        <!-- Dynamic content loads here -->
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal" id="modal">
+      <div class="modal-header">
+        <h2 id="modalTitle">Modal</h2>
+        <button class="modal-close" id="modalClose"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

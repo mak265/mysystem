@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leave a Review - Makrone</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --primary-light: #dbeafe;
+      --success: #10b981;
+      --gray-50: #f8fafc;
+      --gray-100: #f1f5f9;
+      --gray-200: #e2e8f0;
+      --gray-300: #cbd5e1;
+      --gray-400: #94a3b8;
+      --gray-500: #64748b;
+      --gray-600: #475569;
+      --gray-700: #334155;
+      --gray-800: #1e293b;
+      --gray-900: #0f172a;
+      --radius: 12px;
+      --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #1d4ed8 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .review-container {
+      background: white;
+      border-radius: var(--radius);
+      padding: 48px;
+      max-width: 580px;
+      width: 100%;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+    }
+    .review-logo {
+      text-align: center;
+      margin-bottom: 8px;
+    }
+    .review-logo h1 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--gray-900);
+      letter-spacing: 1px;
+    }
+    .review-logo h1 i { color: var(--primary); }
+    .review-intro {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .review-intro h2 {
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: var(--gray-800);
+      margin-bottom: 8px;
+    }
+    .review-intro p {
+      font-size: 0.9rem;
+      color: var(--gray-500);
+      line-height: 1.5;
+    }
+    .review-intro .client-name {
+      display: inline-block;
+      background: var(--primary-light);
+      color: var(--primary);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      margin-top: 8px;
+    }
+    .form-group { margin-bottom: 20px; }
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--gray-700);
+      margin-bottom: 6px;
+    }
+    .form-group label .optional {
+      color: var(--gray-400);
+      font-weight: 400;
+    }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--gray-200);
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      transition: border-color 0.2s;
+      background: var(--gray-50);
+    }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+      background: white;
+    }
+    .form-group textarea { resize: vertical; min-height: 120px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .star-rating {
+      display: flex;
+      gap: 8px;
+      cursor: pointer;
+      padding: 8px 0;
+    }
+    .star-rating .fa-star {
+      font-size: 2rem;
+      color: var(--gray-300);
+      transition: color 0.15s, transform 0.15s;
+    }
+    .star-rating .fa-star.active { color: #f59e0b; }
+    .star-rating .fa-star:hover { transform: scale(1.15); }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 14px 24px;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: var(--primary);
+      color: white;
+    }
+    .btn:hover { background: var(--primary-dark); transform: translateY(-1px); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .success-message {
+      text-align: center;
+      padding: 40px 20px;
+    }
+    .success-message i {
+      font-size: 4rem;
+      color: var(--success);
+      margin-bottom: 16px;
+    }
+    .success-message h2 {
+      font-size: 1.4rem;
+      color: var(--gray-800);
+      margin-bottom: 8px;
+    }
+    .success-message p {
+      color: var(--gray-500);
+      font-size: 0.95rem;
+    }
+    .error-message {
+      text-align: center;
+      padding: 40px 20px;
+    }
+    .error-message i {
+      font-size: 4rem;
+      color: #ef4444;
+      margin-bottom: 16px;
+    }
+    .error-message h2 {
+      font-size: 1.3rem;
+      color: var(--gray-800);
+      margin-bottom: 8px;
+    }
+    .error-message p { color: var(--gray-500); }
+    @media (max-width: 600px) {
+      .review-container { padding: 32px 24px; }
+      .form-row { grid-template-columns: 1fr; }
+      .star-rating .fa-star { font-size: 1.6rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="review-container" id="reviewContainer">
+    <div class="review-logo"><h1><i class="fas fa-bolt"></i> MAKRONE</h1></div>
+    <div id="reviewContent">
+      <div style="text-align: center; padding: 40px;"><i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: var(--primary);"></i><p style="margin-top: 12px; color: var(--gray-400);">Verifying your review link...</p></div>
+    </div>
+  </div>
+
+  <script>
+    const token = window.location.pathname.split('/review/')[1];
+
+    async function init() {
+      if (!token) {
+        showError('Invalid Link', 'This review link is not valid.');
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/reviews/verify/${token}`);
+        const data = await res.json();
+
+        if (data.error) {
+          showError('Link Expired or Invalid', data.error);
+          return;
+        }
+
+        if (data.used) {
+          showError('Already Reviewed', 'You have already submitted a review using this link. Salamat!');
+          return;
+        }
+
+        showForm(data);
+      } catch (err) {
+        showError('Connection Error', 'Could not verify the link. Please try again later.');
+      }
+    }
+
+    function showError(title, message) {
+      document.getElementById('reviewContent').innerHTML = `
+        <div class="error-message">
+          <i class="fas fa-exclamation-circle"></i>
+          <h2>${title}</h2>
+          <p>${message}</p>
+        </div>
+      `;
+    }
+
+    function showForm(data) {
+      document.getElementById('reviewContent').innerHTML = `
+        <div class="review-intro">
+          <h2>We'd Love Your Feedback!</h2>
+          <p>Hi${data.client_name ? ' <strong>' + data.client_name + '</strong>' : ''}! Thank you for choosing Makrone. Please take a moment to share your experience with us.</p>
+          ${data.service_name ? `<span class="client-name">${data.service_name}</span>` : ''}
+        </div>
+        <form id="reviewForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Display Name <span class="optional">(optional)</span></label>
+              <input type="text" name="name" value="${data.client_name || ''}" placeholder="How should we display your name?">
+            </div>
+            <div class="form-group">
+              <label>Service</label>
+              <input type="text" name="service" value="${data.service_name || ''}" readonly style="background: var(--gray-100); color: var(--gray-600);">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Your Rating</label>
+            <div class="star-rating" id="starRating">
+              <i class="fas fa-star active" data-rating="1"></i>
+              <i class="fas fa-star active" data-rating="2"></i>
+              <i class="fas fa-star active" data-rating="3"></i>
+              <i class="fas fa-star active" data-rating="4"></i>
+              <i class="fas fa-star active" data-rating="5"></i>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Your Review *</label>
+            <textarea name="message" placeholder="How was your experience? What did you like about our service? Any suggestions?" required></textarea>
+          </div>
+          <button type="submit" class="btn"><i class="fas fa-paper-plane"></i> Submit Review</button>
+        </form>
+      `;
+
+      // Star rating
+      let selectedRating = 5;
+      document.querySelectorAll('#starRating .fa-star').forEach(star => {
+        star.addEventListener('click', () => {
+          selectedRating = parseInt(star.dataset.rating);
+          updateStars();
+        });
+        star.addEventListener('mouseenter', () => {
+          document.querySelectorAll('#starRating .fa-star').forEach(s => {
+            s.classList.toggle('active', parseInt(s.dataset.rating) <= parseInt(star.dataset.rating));
+          });
+        });
+      });
+      document.getElementById('starRating').addEventListener('mouseleave', updateStars);
+
+      function updateStars() {
+        document.querySelectorAll('#starRating .fa-star').forEach(s => {
+          s.classList.toggle('active', parseInt(s.dataset.rating) <= selectedRating);
+        });
+      }
+
+      // Submit
+      document.getElementById('reviewForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = e.target.querySelector('button');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+
+        const formData = Object.fromEntries(new FormData(e.target));
+        formData.rating = selectedRating;
+        formData.token = token;
+
+        try {
+          const res = await fetch('/api/reviews/submit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData)
+          });
+          const result = await res.json();
+          if (result.message) {
+            document.getElementById('reviewContent').innerHTML = `
+              <div class="success-message">
+                <i class="fas fa-check-circle"></i>
+                <h2>Salamat!</h2>
+                <p>Your review has been submitted successfully. We truly appreciate your feedback!</p>
+              </div>
+            `;
+          } else {
+            alert(result.error || 'Something went wrong.');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Review';
+          }
+        } catch (err) {
+          alert('Failed to submit. Please try again.');
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Review';
+        }
+      });
+    }
+
+    init();
+  </script>
+</body>
+</html>
