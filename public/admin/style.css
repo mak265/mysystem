@@ -488,3 +488,53 @@ tr:hover {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* Login Screen */
+.login-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #1d4ed8 100%);
+  padding: 24px;
+}
+
+.login-box {
+  background: white;
+  border-radius: 12px;
+  padding: 48px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+}
+
+.login-logo {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.login-logo i {
+  font-size: 2.5rem;
+  color: #2563eb;
+}
+
+.login-logo h1 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  margin-top: 8px;
+}
+
+.login-logo p {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+.login-error {
+  color: #ef4444;
+  font-size: 0.85rem;
+  margin-bottom: 12px;
+  min-height: 20px;
+}

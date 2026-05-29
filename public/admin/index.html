@@ -9,7 +9,33 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
-  <div class="app">
+  <!-- Login Screen -->
+  <div class="login-screen" id="loginScreen">
+    <div class="login-box">
+      <div class="login-logo">
+        <i class="fas fa-bolt"></i>
+        <h1>MAKRONE</h1>
+        <p>Admin Panel</p>
+      </div>
+      <form id="loginForm">
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" id="loginUsername" name="username" required placeholder="Enter username" autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="loginPassword" name="password" required placeholder="Enter password" autocomplete="current-password">
+        </div>
+        <p class="login-error" id="loginError"></p>
+        <button type="submit" class="btn btn-primary" style="width:100%; padding: 12px; font-size: 1rem;">
+          <i class="fas fa-sign-in-alt"></i> Login
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Main App (hidden until login) -->
+  <div class="app" id="mainApp" style="display:none;">
     <!-- Sidebar -->
     <aside class="sidebar">
       <div class="sidebar-header">
@@ -48,6 +74,9 @@
       <div class="sidebar-footer">
         <a href="/" class="nav-item" style="color: var(--gray-400); font-size: 0.8rem;">
           <i class="fas fa-globe"></i><span>View Website</span>
+        </a>
+        <a href="#" class="nav-item" onclick="logout()" style="color: #ef4444; font-size: 0.8rem;">
+          <i class="fas fa-sign-out-alt"></i><span>Logout</span>
         </a>
         <p>&copy; 2024 Makrone</p>
       </div>

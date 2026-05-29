@@ -2,10 +2,75 @@
 
 const API = '';
 let currentPage = 'dashboard';
+let authToken = localStorage.getItem('makrone_token') || '';
 
 // Cache
 let clientsCache = [];
 let servicesCache = [];
+
+// ============ AUTH ============
+async function checkAuth() {
+  if (!authToken) {
+    showLogin();
+    return;
+  }
+  const res = await fetch('/api/auth/check', { headers: { 'x-auth-token': authToken } });
+  const data = await res.json();
+  if (data.authenticated) {
+    showApp();
+  } else {
+    localStorage.removeItem('makrone_token');
+    authToken = '';
+    showLogin();
+  }
+}
+
+function showLogin() {
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('mainApp').style.display = 'none';
+}
+
+function showApp() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('mainApp').style.display = 'flex';
+  loadDashboard();
+}
+
+function logout() {
+  fetch('/api/auth/logout', { method: 'POST', headers: { 'x-auth-token': authToken } });
+  localStorage.removeItem('makrone_token');
+  authToken = '';
+  showLogin();
+}
+
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const username = document.getElementById('loginUsername').value;
+  const password = document.getElementById('loginPassword').value;
+  const errorEl = document.getElementById('loginError');
+  errorEl.textContent = '';
+
+  try {
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+    const data = await res.json();
+    if (data.token) {
+      authToken = data.token;
+      localStorage.setItem('makrone_token', authToken);
+      showApp();
+    } else {
+      errorEl.textContent = data.error || 'Login failed';
+    }
+  } catch (err) {
+    errorEl.textContent = 'Connection error. Try again.';
+  }
+});
+
+// Init
+checkAuth();
 
 // ============ NAVIGATION ============
 document.querySelectorAll('.nav-item[data-page]').forEach(item => {
@@ -897,10 +962,16 @@ document.getElementById('modalOverlay').addEventListener('click', (e) => {
 
 // ============ UTILITIES ============
 async function fetchAPI(url, method = 'GET', body = null) {
-  const options = { method, headers: { 'Content-Type': 'application/json' } };
+  const options = { method, headers: { 'Content-Type': 'application/json', 'x-auth-token': authToken } };
   if (body) options.body = JSON.stringify(body);
   try {
     const res = await fetch(API + url, options);
+    if (res.status === 401) {
+      localStorage.removeItem('makrone_token');
+      authToken = '';
+      showLogin();
+      return {};
+    }
     return await res.json();
   } catch (err) {
     console.error('API Error:', err);
@@ -927,4 +998,4 @@ function getStatusClass(status) {
 }
 
 // ============ INIT ============
-loadDashboard();
+// Auth check handles initialization

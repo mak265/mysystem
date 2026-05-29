@@ -8,12 +8,79 @@ const crypto = require('crypto');
 const app = express();
 const PORT = process.env.PORT || 5555;
 
+// ============ ADMIN CREDENTIALS ============
+// Change these to your own!
+const ADMIN_USERNAME = 'admin';
+const ADMIN_PASSWORD = 'makrone2024';
+// ===========================================
+
+// Active sessions
+const sessions = new Map();
+
 // Middleware
 app.use(cors());
 app.use(express.json());
 
-// Serve admin panel at /admin
+// Auth middleware - check session token
+function requireAuth(req, res, next) {
+  const token = req.headers['x-auth-token'] || req.query.token;
+  if (!token || !sessions.has(token)) {
+    return res.status(401).json({ error: 'Unauthorized. Please login.' });
+  }
+  // Refresh session expiry
+  sessions.set(token, Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+  next();
+}
+
+// Clean expired sessions every hour
+setInterval(() => {
+  const now = Date.now();
+  for (const [token, expiry] of sessions) {
+    if (now > expiry) sessions.delete(token);
+  }
+}, 60 * 60 * 1000);
+
+// --- Login/Logout routes (no auth needed) ---
+app.post('/api/auth/login', (req, res) => {
+  const { username, password } = req.body;
+  if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+    const token = crypto.randomBytes(32).toString('hex');
+    sessions.set(token, Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+    res.json({ token, message: 'Login successful' });
+  } else {
+    res.status(401).json({ error: 'Invalid username or password' });
+  }
+});
+
+app.post('/api/auth/logout', (req, res) => {
+  const token = req.headers['x-auth-token'];
+  if (token) sessions.delete(token);
+  res.json({ message: 'Logged out' });
+});
+
+app.get('/api/auth/check', (req, res) => {
+  const token = req.headers['x-auth-token'];
+  if (token && sessions.has(token)) {
+    res.json({ authenticated: true });
+  } else {
+    res.json({ authenticated: false });
+  }
+});
+
+// Serve admin panel at /admin (static files, login page handles auth)
 app.use('/admin', express.static(path.join(__dirname, 'public', 'admin')));
+
+// Protect all API routes except public ones
+app.use('/api/dashboard', requireAuth);
+app.use('/api/clients', requireAuth);
+app.use('/api/services', requireAuth);
+app.use('/api/jobs', requireAuth);
+app.use('/api/invoices', requireAuth);
+app.use('/api/analytics', requireAuth);
+app.use('/api/inquiries', requireAuth);
+app.use('/api/reviews/all', requireAuth);
+app.use('/api/reviews/links', requireAuth);
+app.use('/api/reviews/generate-link', requireAuth);
 
 // Serve landing page assets (disable auto index.html serving)
 app.use(express.static(path.join(__dirname, 'public'), { index: false }));
