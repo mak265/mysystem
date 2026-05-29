@@ -6,7 +6,7 @@ const fs = require('fs');
 const crypto = require('crypto');
 
 const app = express();
-const PORT = process.env.PORT || 80;
+const PORT = process.env.PORT || 5555;
 
 // Middleware
 app.use(cors());
