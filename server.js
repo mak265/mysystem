@@ -4,6 +4,7 @@ const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
+const multer = require('multer');
 
 const app = express();
 const PORT = process.env.PORT || 5555;
@@ -84,6 +85,32 @@ app.use('/api/reviews/generate-link', requireAuth);
 
 // Serve landing page assets (disable auto index.html serving)
 app.use(express.static(path.join(__dirname, 'public'), { index: false }));
+
+// Serve uploaded images
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+app.use('/uploads', express.static(uploadsDir));
+
+// Multer config for image uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, uploadsDir),
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    const name = crypto.randomBytes(8).toString('hex') + ext;
+    cb(null, name);
+  }
+});
+const upload = multer({
+  storage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB max
+  fileFilter: (req, file, cb) => {
+    const allowed = /jpeg|jpg|png|gif|webp/;
+    const ext = allowed.test(path.extname(file.originalname).toLowerCase());
+    const mime = allowed.test(file.mimetype);
+    if (ext && mime) cb(null, true);
+    else cb(new Error('Only images allowed (jpg, png, gif, webp)'));
+  }
+});
 
 const DB_PATH = path.join(__dirname, 'makrone.db');
 let db;
@@ -238,6 +265,17 @@ async function startServer() {
       used INTEGER DEFAULT 0,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (client_id) REFERENCES clients(id)
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS gallery (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT NOT NULL,
+      description TEXT,
+      category TEXT,
+      filename TEXT NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `);
 
@@ -660,6 +698,42 @@ async function startServer() {
   // Serve review page for token links
   app.get('/review/:token', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'review.html'));
+  });
+
+  // --- Gallery (public) ---
+  app.get('/api/gallery', (req, res) => {
+    const photos = queryAll('SELECT * FROM gallery ORDER BY created_at DESC');
+    res.json(photos);
+  });
+
+  // --- Gallery (admin - protected by requireAuth middleware above) ---
+  app.post('/api/gallery/upload', upload.single('photo'), (req, res) => {
+    // Check auth manually since multer runs before route
+    const token = req.headers['x-auth-token'];
+    if (!token || !sessions.has(token)) {
+      // Delete uploaded file
+      if (req.file) fs.unlinkSync(req.file.path);
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    if (!req.file) return res.status(400).json({ error: 'No image uploaded' });
+
+    const { title, description, category } = req.body;
+    runStmt(
+      'INSERT INTO gallery (title, description, category, filename) VALUES (?, ?, ?, ?)',
+      [title || 'Untitled', description || '', category || 'General', req.file.filename]
+    );
+    res.json({ message: 'Photo uploaded successfully', filename: req.file.filename });
+  });
+
+  app.delete('/api/gallery/:id', (req, res) => {
+    const photo = queryOne('SELECT * FROM gallery WHERE id = ?', [req.params.id]);
+    if (photo) {
+      const filePath = path.join(uploadsDir, photo.filename);
+      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+      runStmt('DELETE FROM gallery WHERE id = ?', [req.params.id]);
+    }
+    res.json({ message: 'Photo deleted successfully' });
   });
 
   // --- Serve landing page at root ---

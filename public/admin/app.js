@@ -97,6 +97,7 @@ function getPageTitle(page) {
     analytics: 'Website Analytics',
     inquiries: 'Customer Inquiries',
     reviews: 'Customer Reviews',
+    gallery: 'Photo Gallery',
     clients: 'Clients',
     jobs: 'Job Orders',
     services: 'Services',
@@ -116,6 +117,7 @@ async function loadPage(page) {
     case 'analytics': await loadAnalytics(); break;
     case 'inquiries': await loadInquiries(); break;
     case 'reviews': await loadReviews(); break;
+    case 'gallery': await loadGallery(); break;
     case 'clients': await loadClients(); break;
     case 'jobs': await loadJobs(); break;
     case 'services': await loadServices(); break;
@@ -595,6 +597,135 @@ async function deleteReview(id) {
   if (!confirm('Delete this review permanently?')) return;
   await fetchAPI(`/api/reviews/${id}`, 'DELETE');
   loadReviews();
+}
+
+// ============ GALLERY ============
+async function loadGallery() {
+  const photos = await fetchAPI('/api/gallery');
+  const photosList = Array.isArray(photos) ? photos : [];
+  const content = document.getElementById('content');
+
+  content.innerHTML = `
+    <div class="stats-grid" style="grid-template-columns: repeat(2, 1fr);">
+      <div class="stat-card">
+        <div class="stat-icon blue"><i class="fas fa-images"></i></div>
+        <div class="stat-info"><h3>${photosList.length}</h3><p>Total Photos</p></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon green"><i class="fas fa-upload"></i></div>
+        <div class="stat-info"><h3><button class="btn btn-primary" onclick="showUploadForm()"><i class="fas fa-plus"></i> Upload Photo</button></h3><p></p></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2>All Photos</h2>
+      </div>
+      <div style="padding: 24px;">
+        ${photosList.length ? `
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px;">
+            ${photosList.map(p => `
+              <div style="border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); background: white;">
+                <div style="height: 160px; overflow: hidden; background: var(--gray-100);">
+                  <img src="/uploads/${p.filename}" alt="${p.title}" style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
+                <div style="padding: 12px;">
+                  <h4 style="font-size: 0.9rem; margin-bottom: 4px;">${p.title}</h4>
+                  <p style="font-size: 0.75rem; color: var(--gray-500); margin-bottom: 4px;">${p.description || ''}</p>
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span class="badge badge-progress">${p.category || 'General'}</span>
+                    <button class="btn btn-danger btn-sm" onclick="deletePhoto(${p.id})"><i class="fas fa-trash"></i></button>
+                  </div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        ` : '<div class="empty-state"><i class="fas fa-images"></i><p>No photos yet. Upload your first photo!</p></div>'}
+      </div>
+    </div>
+  `;
+}
+
+function showUploadForm() {
+  openModal('Upload Photo', `
+    <form id="uploadForm" enctype="multipart/form-data">
+      <div class="form-group">
+        <label>Photo *</label>
+        <input type="file" name="photo" accept="image/*" required id="photoInput" style="padding: 8px;">
+        <div id="photoPreview" style="margin-top: 12px; display: none;">
+          <img id="previewImg" style="max-width: 100%; max-height: 200px; border-radius: 8px; object-fit: cover;">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Title *</label>
+        <input type="text" name="title" required placeholder="e.g. CCTV Installation at SM Mall">
+      </div>
+      <div class="form-group">
+        <label>Category</label>
+        <select name="category">
+          <option value="CCTV">CCTV</option>
+          <option value="Laptop">Laptop</option>
+          <option value="Phone">Phone</option>
+          <option value="Networking">Networking</option>
+          <option value="Custom Systems">Custom Systems</option>
+          <option value="General">General</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <textarea name="description" placeholder="Short description of the work done..."></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary"><i class="fas fa-upload"></i> Upload</button>
+    </form>
+  `);
+
+  // Image preview
+  document.getElementById('photoInput').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        document.getElementById('previewImg').src = ev.target.result;
+        document.getElementById('photoPreview').style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+
+  document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const btn = e.target.querySelector('button[type="submit"]');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+
+    try {
+      const res = await fetch('/api/gallery/upload', {
+        method: 'POST',
+        headers: { 'x-auth-token': authToken },
+        body: formData
+      });
+      const data = await res.json();
+      if (data.message) {
+        closeModal();
+        loadGallery();
+      } else {
+        alert(data.error || 'Upload failed');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-upload"></i> Upload';
+      }
+    } catch (err) {
+      alert('Upload failed. Try again.');
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-upload"></i> Upload';
+    }
+  });
+}
+
+async function deletePhoto(id) {
+  if (!confirm('Delete this photo?')) return;
+  await fetchAPI(`/api/gallery/${id}`, 'DELETE');
+  loadGallery();
 }
 
 

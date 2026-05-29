@@ -2,3 +2,5 @@ node_modules/
 makrone.db
 *.log
 .env
+uploads/*
+!uploads/.gitkeep
