@@ -694,10 +694,21 @@ function showUploadForm() {
 
   document.getElementById('uploadForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const formData = new FormData(e.target);
+    const formData = new FormData();
+    const fileInput = document.getElementById('photoInput');
+    const file = fileInput.files[0];
+    if (!file) return alert('Please select a photo');
+
     const btn = e.target.querySelector('button[type="submit"]');
     btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Compressing & Uploading...';
+
+    // Compress image before upload
+    const compressed = await compressImage(file, 1200, 0.8);
+    formData.append('photo', compressed, file.name);
+    formData.append('title', e.target.querySelector('[name="title"]').value);
+    formData.append('category', e.target.querySelector('[name="category"]').value);
+    formData.append('description', e.target.querySelector('[name="description"]').value);
 
     try {
       const res = await fetch('/api/gallery/upload', {
@@ -1126,6 +1137,38 @@ function getStatusClass(status) {
     case 'Completed': return 'completed';
     default: return 'pending';
   }
+}
+
+// ============ IMAGE COMPRESSION ============
+function compressImage(file, maxWidth = 1200, quality = 0.8) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+
+        // Resize if larger than maxWidth
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        canvas.toBlob((blob) => {
+          resolve(blob);
+        }, 'image/jpeg', quality);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
 }
 
 // ============ INIT ============

@@ -77,11 +77,16 @@ app.use('/api/clients', requireAuth);
 app.use('/api/services', requireAuth);
 app.use('/api/jobs', requireAuth);
 app.use('/api/invoices', requireAuth);
-app.use('/api/analytics', requireAuth);
-app.use('/api/inquiries', requireAuth);
+app.use('/api/analytics/stats', requireAuth);
+app.use('/api/inquiries', (req, res, next) => {
+  // Allow POST from landing page (contact form), protect GET/PUT/DELETE
+  if (req.method === 'POST' && req.path === '/') return next();
+  requireAuth(req, res, next);
+});
 app.use('/api/reviews/all', requireAuth);
 app.use('/api/reviews/links', requireAuth);
 app.use('/api/reviews/generate-link', requireAuth);
+app.use('/api/gallery/upload', requireAuth);
 
 // Serve landing page assets (disable auto index.html serving)
 app.use(express.static(path.join(__dirname, 'public'), { index: false }));
